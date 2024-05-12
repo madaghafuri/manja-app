@@ -64,12 +64,25 @@ app.post(
 		}
 
 		try {
-			const register = await c.env.DB.prepare('INSERT INTO user (email, passkey, username, created_at) VALUES (?, ?, ?, date())')
+			await c.env.DB.prepare('INSERT INTO user (email, passkey, username, created_at) VALUES (?, ?, ?, date())')
 				.bind(email, password, username)
 				.run();
-			console.log(register);
+			const [result] = await c.env.DB.prepare('SELECT id FROM user WHERE email = ?').bind(email).raw();
+			const userId = result[0];
+			await c.env.DB.prepare("INSERT INTO workspace (title, created_at) VALUES ('My Workspace', date())").run();
+			const assignWS = await c.env.DB.prepare('INSERT INTO workspace_admin (user_id, workspace_id) VALUES (?, last_insert_rowid())')
+				.bind(userId)
+				.run();
+			console.log(assignWS);
 		} catch (error) {
 			console.error(error);
+			return c.json(
+				{
+					error: error,
+					message: error,
+				},
+				500
+			);
 		}
 
 		return c.json({
