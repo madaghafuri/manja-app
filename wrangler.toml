@@ -1,6 +1,6 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "manja-worker"
-main = "src/index.ts"
+main = "src/index.tsx"
 compatibility_date = "2024-05-02"
 compatibility_flags = ["nodejs_compat"]
 
@@ -106,3 +106,8 @@ compatibility_flags = ["nodejs_compat"]
 # [[vectorize]]
 # binding = "MY_INDEX"
 # index_name = "my-index"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "manja-d1-dev"
+database_id = "324028e3-d78c-45a5-bef1-d6dcbcf17937"
