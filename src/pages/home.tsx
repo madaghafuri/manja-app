@@ -1,9 +1,9 @@
 import BaseLayout from '../layouts/base-layout';
 
-export default function Home() {
+export default function Home({ userId }: { userId?: number }) {
 	return (
-		<BaseLayout>
-			<main class="absolute inset-0 m-auto md:w-[70rem] py-5">
+		<BaseLayout authId={userId}>
+			<main class="bg-background absolute inset-0 m-auto py-5 md:w-[70rem]">
 				<section class="grid grid-cols-[20%,auto,20%,20%]">
 					<div>ini</div>
 					<div>ini</div>
