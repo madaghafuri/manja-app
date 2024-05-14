@@ -1,20 +1,21 @@
 import { html } from 'hono/html';
-import { createContext, useContext } from 'hono/jsx';
+import { createContext, useState } from 'hono/jsx';
 
 const theme = 'light';
 export const ThemeContext = createContext(theme);
 
 export default function BaseLayout({ children, authId }: { children: JSX.Element; authId?: number }) {
-	const theme = useContext(ThemeContext);
+	const [theme, setTheme] = useState('light');
 
 	return (
 		<html>
 			<head>
 				<script
-					src="https://unpkg.com/htmx.org@1.9.12"
-					integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2"
+					src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.js"
+					integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS"
 					crossorigin="anonymous"
 				></script>
+				<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 				<script src="https://cdn.tailwindcss.com"></script>
 				{html`
 					<style type="text/tailwindcss">
@@ -45,14 +46,14 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 								--destructive-foreground: 210 40% 98%;
 
 								--border: 214.3 31.8% 91.4%;
-								--input: 214.3 31.8% 91.4%;
+								--input: 226 100% 94%;
 								--ring: 222.2 84% 4.9%;
 
 								--radius: 0.5rem;
 							}
 
 							.dark {
-								--background: 0 0% 7%;
+								--background: 0 0% 13%;
 								--foreground: 210 40% 98%;
 
 								--card: 222.2 84% 4.9%;
@@ -76,9 +77,122 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 								--destructive: 0 62.8% 30.6%;
 								--destructive-foreground: 210 40% 98%;
 
-								--border: 217.2 32.6% 17.5%;
+								--border: 0 0% 25%;
 								--input: 217.2 32.6% 17.5%;
 								--ring: 212.7 26.8% 83.9%;
+							}
+
+							@media (prefers-color-scheme: dark) {
+								.dark {
+								}
+							}
+						}
+
+						@layer base {
+							body {
+								@apply bg-background text-foreground;
+							}
+						}
+
+						#modal {
+							/* Underlay covers entire screen. */
+							position: fixed;
+							top: 0px;
+							bottom: 0px;
+							left: 0px;
+							right: 0px;
+							background-color: rgba(0, 0, 0, 0.5);
+							z-index: 1000;
+
+							/* Flexbox centers the .modal-content vertically and horizontally */
+							display: flex;
+							flex-direction: column;
+							align-items: center;
+
+							/* Animate when opening */
+							animation-name: fadeIn;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#modal > .modal-underlay {
+							/* underlay takes up the entire viewport. This is only
+	required if you want to click to dismiss the popup */
+							position: absolute;
+							z-index: -1;
+							top: 0px;
+							bottom: 0px;
+							left: 0px;
+							right: 0px;
+						}
+
+						#modal > .modal-content {
+							/* Position visible dialog near the top of the window */
+							margin-top: 10vh;
+
+							/* Sizing for visible dialog */
+							width: 80%;
+							max-width: 600px;
+
+							/* Display properties for visible dialog*/
+							border: solid 1px #999;
+							border-radius: 8px;
+							box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
+							padding: 20px;
+
+							/* Animate when opening */
+							animation-name: zoomIn;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#modal.closing {
+							/* Animate when closing */
+							animation-name: fadeOut;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#modal.closing > .modal-content {
+							/* Animate when closing */
+							animation-name: zoomOut;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						@keyframes fadeIn {
+							0% {
+								opacity: 0;
+							}
+							100% {
+								opacity: 1;
+							}
+						}
+
+						@keyframes fadeOut {
+							0% {
+								opacity: 1;
+							}
+							100% {
+								opacity: 0;
+							}
+						}
+
+						@keyframes zoomIn {
+							0% {
+								transform: scale(0.9);
+							}
+							100% {
+								transform: scale(1);
+							}
+						}
+
+						@keyframes zoomOut {
+							0% {
+								transform: scale(1);
+							}
+							100% {
+								transform: scale(0.9);
 							}
 						}
 					</style>
@@ -89,7 +203,10 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 								extend: {
 									colors: {
 										background: 'hsl(var(--background))',
+										foreground: 'hsl(var(--foreground))',
 										border: 'hsl(var(--border))',
+										input: 'hsl(var(--input))',
+										secondary: 'hsl(var(--secondary))',
 									},
 								},
 							},
@@ -99,14 +216,17 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 
 				<title>Manja</title>
 			</head>
-			<body class="relative">
-				<nav class="flex justify-end gap-3 px-10 py-3">
+			<body _="on changeTheme toggle .dark on me">
+				<nav class="bg-background flex justify-end gap-3 px-10 py-3">
 					{authId && (
 						<button class="border-border rounded border px-3 py-1 hover:bg-indigo-500 hover:text-white" hx-post="/auth/logout">
 							Logout
 						</button>
 					)}
-					<button class="border-border rounded border px-3 py-1">Dark</button>
+					<input type="checkbox" onchange="" />
+					<button class="border-border rounded border px-3 py-1 hover:bg-indigo-500 hover:text-white" _="on click trigger changeTheme">
+						Theme
+					</button>
 				</nav>
 				{children}
 			</body>

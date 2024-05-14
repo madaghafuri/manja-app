@@ -1,3 +1,4 @@
+import { AuthInput } from '../components/auth-input';
 import BaseLayout from '../layouts/base-layout';
 
 export default function Login() {
@@ -12,11 +13,11 @@ export default function Login() {
 				<span class="w-full border"></span>
 				<div class="flex flex-col gap-3">
 					<label htmlFor="">Email</label>
-					<input type="email" name="email" required class="rounded border border-gray-400 bg-indigo-100 p-3" />
+					<AuthInput type="email" name="email" required />
 				</div>
 				<div class="flex flex-col gap-3">
 					<label htmlFor="">Password</label>
-					<input type="password" name="password" required class="rounded border border-gray-400 bg-indigo-100 p-3" />
+					<AuthInput type="password" name="password" required />
 				</div>
 				<div id="error-result"></div>
 				<button type="submit" class="rounded-lg bg-indigo-400 p-3 text-xl font-bold text-white">

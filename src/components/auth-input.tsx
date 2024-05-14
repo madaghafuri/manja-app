@@ -1,3 +1,3 @@
 export const AuthInput = ({ ...props }: Hono.InputHTMLAttributes) => {
-	return <input class="p-3 rounded border border-grey-400 bg-indigo-100" {...props} />;
+	return <input class="border-grey-400 bg-input rounded border p-3" {...props} />;
 };

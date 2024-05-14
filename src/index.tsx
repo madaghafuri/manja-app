@@ -11,14 +11,15 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 import { Hono } from 'hono';
-import { userSchema } from './auth';
-import { validator } from 'hono/validator';
 import Home from './pages/home';
 import Login from './pages/login';
 import Register from './pages/register';
 import { CookieStore, Session, sessionMiddleware } from 'hono-sessions';
 import { setCookie } from 'hono/cookie';
-import { z } from 'zod';
+import { Workspace as WorkspaceType } from './schema';
+import Workspace from './pages/workspace';
+import auth from './auth';
+import Modal from './components/modal';
 
 export type Bindings = {
 	DB: D1Database;
@@ -51,9 +52,11 @@ app.get('/', (c) => {
 	const session = c.get('session');
 	const userId = session.get('userId') as number;
 
-	console.log(userId);
-
 	return c.html(<Home userId={userId}></Home>);
+});
+
+app.get('/modal', (c) => {
+	return c.html(<Modal></Modal>);
 });
 
 app.get('/set-cookie', (c) => {
@@ -69,94 +72,77 @@ app.get('/register', (c) => {
 	return c.html(<Register></Register>);
 });
 
-app.get('/w/:workspaceId/task', async (c) => {
-	const result = await c.env.DB.prepare('SELECT * FROM ');
+app.get('/w/:workspaceId', async (c) => {
+	const wsId = c.req.param('workspaceId');
+	const { results } = await c.env.DB.prepare('SELECT id, title, created_at FROM workspace WHERE id = ?')
+		.bind(parseInt(wsId))
+		.all<WorkspaceType>();
+	const userId = c.get('session').get('userId') as number;
+
+	try {
+		const projects = await c.env.DB.prepare('SELECT id, title, workspace_id FROM project WHERE workspace_id = ?').bind(results[0].id).all();
+		console.log(projects);
+	} catch (error) {}
+
+	if (!userId) return c.html(<div>Unauthorized Access!</div>);
+
+	return c.html(<Workspace authId={userId} workspace={results[0]}></Workspace>);
 });
 
-app.post(
-	'/auth/register',
-	validator('form', (value, c) => {
-		const email = value['email'];
-		const password = value['password'];
+app.get('/w/:workspaceId/home', async (c) => {
+	const wsId = c.req.param('workspaceId');
 
-		if (!email || !password) {
-			return c.text('missing required parameter', 400);
-		}
-		return value as Record<'email' | 'password' | 'username', string>;
-	}),
-	async (c) => {
-		const { email, password, username } = c.req.valid('form');
-		const checkEmail = await c.env.DB.prepare('SELECT id, email, created_at FROM user WHERE email = ?').bind(email).first();
-		if (!!checkEmail) {
-			return c.html(<span class="text-red-500">Email already in use!</span>, 200);
-		}
-
-		try {
-			await c.env.DB.prepare('INSERT INTO user (email, passkey, username, created_at) VALUES (?, ?, ?, date())')
-				.bind(email, password, username)
-				.run();
-			const [result] = await c.env.DB.prepare('SELECT id FROM user WHERE email = ?').bind(email).raw();
-			const userId = result[0];
-			await c.env.DB.prepare("INSERT INTO workspace (title, created_at) VALUES ('My Workspace', date())").run();
-			await c.env.DB.prepare('INSERT INTO workspace_admin (user_id, workspace_id) VALUES (?, last_insert_rowid())').bind(userId).run();
-		} catch (error) {
-			return c.html(<span class="text-red-500">Error persisting record!</span>, 200);
-		}
-
-		return c.text('Account created successfully!', 200, {
-			'HX-Redirect': '/login',
-		});
-	},
-);
-
-app.post(
-	'/auth/login',
-	validator('form', async (value, c) => {
-		const email = value['email'];
-		const password = value['password'];
-
-		if (!email || !password) {
-			return c.html('Missing email or password');
-		}
-
-		return value;
-	}),
-	async (c) => {
-		//@ts-ignore
-		const { email, password } = c.req.valid('form');
-
-		const result = await c.env.DB.prepare(
-			'SELECT id, email, username, passkey, created_at FROM user WHERE user.email = ? AND user.passkey = ?',
-		)
-			.bind(email, password)
-			.first<z.infer<typeof userSchema>>();
-
-		if (!result) return c.html(<span class="font-bold text-red-500">Credential does not match our record</span>);
-
-		try {
-			const res = await c.env.DB.prepare('SELECT id FROM workspace INNER JOIN workspace_admin ON workspace_admin.user_id = ?')
-				.bind(result.id)
-				.first();
-			console.log(res);
-		} catch (error) {
-			console.error(error);
-		}
-
-		const session = c.get('session');
-		session.set('userId', result.id);
-
-		return c.text('Login success!', 200, {
-			'HX-Redirect': '/',
-		});
-	},
-);
-
-app.post('/auth/logout', (c) => {
-	const session = c.get('session');
-	session.deleteSession();
-	return c.text('Logout sucess!', 200, {
-		'HX-Redirect': '/',
-	});
+	return c.html(
+		<div>
+			<div role="tablist">
+				<button
+					hx-get={`/w/${wsId}/home`}
+					class="bg-secondary rounded-lg px-4 py-2"
+					aria-selected="true"
+					autofocus
+					role="tab"
+					aria-controls="tab-content"
+				>
+					Home
+				</button>
+				<button hx-get={`/w/${wsId}/tasks`} class="rounded-lg px-4 py-2" role="tab" aria-selected="false" aria-controls="tab-content">
+					Tasks
+				</button>
+			</div>
+			<div id="tab-content" role="tabpanel">
+				Home content
+			</div>
+		</div>,
+	);
 });
+
+app.get('/w/:workspaceId/tasks', async (c) => {
+	const wsId = c.req.param('workspaceId');
+
+	return c.html(
+		<div>
+			<div role="tablist">
+				<button hx-get={`/w/${wsId}/home`} class="rounded-lg px-4 py-2" aria-selected="false" role="tab" aria-controls="tab-content">
+					Home
+				</button>
+				<button
+					hx-get={`/w/${wsId}/tasks`}
+					class="bg-secondary rounded-lg px-4 py-2"
+					role="tab"
+					autofocus
+					aria-selected="true"
+					aria-controls="tab-content"
+				>
+					Tasks
+				</button>
+			</div>
+			<div id="tab-content" role="tabpanel">
+				Task content
+			</div>
+		</div>,
+	);
+});
+
+app.route('/auth', auth);
 
 export default app;
