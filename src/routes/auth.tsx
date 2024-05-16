@@ -1,10 +1,11 @@
 import { Context, Hono } from 'hono';
-import { Bindings } from '.';
+import { Bindings } from '..';
 import { BlankInput } from 'hono/types';
 import { z } from 'zod';
 import { validator } from 'hono/validator';
-import { Workspace as WorkspaceType } from './schema';
+import { Workspace as WorkspaceType } from '../schema';
 import { Session } from 'hono-sessions';
+import Modal from '../components/modal';
 
 type User = {
 	id: number;
@@ -66,7 +67,9 @@ app.post(
 			const [result] = await c.env.DB.prepare('SELECT id FROM user WHERE email = ?').bind(email).raw();
 			const userId = result[0];
 			await c.env.DB.prepare("INSERT INTO workspace (title, created_at) VALUES ('My Workspace', date())").run();
-			await c.env.DB.prepare('INSERT INTO workspace_admin (user_id, workspace_id) VALUES (?, last_insert_rowid())').bind(userId).run();
+			await c.env.DB.prepare('INSERT INTO workspace_member (user_id, workspace_id, role_id) VALUES (?, last_insert_rowid(), ?)')
+				.bind(userId, 1)
+				.run();
 		} catch (error) {
 			return c.html(<span class="text-red-500">Error persisting record!</span>, 200);
 		}
@@ -104,13 +107,13 @@ app.post(
 		let workspaceId: number;
 		try {
 			const res = await c.env.DB.prepare(
-				'SELECT workspace.id, workspace.title, workspace.created_at FROM workspace INNER JOIN workspace_admin ON workspace_admin.user_id = ?',
+				'SELECT workspace.id, workspace.title, workspace.created_at FROM workspace INNER JOIN workspace_member ON workspace_member.user_id = ?',
 			)
 				.bind(result.id)
 				.first<WorkspaceType>();
 			workspaceId = (res as WorkspaceType).id as number;
 		} catch (error) {
-			return c.html(<div>Error 404 Not found</div>, 404);
+			return c.html(<div>Error 404 Not found</div>);
 		}
 
 		const session = c.get('session');

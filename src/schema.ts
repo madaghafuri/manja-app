@@ -11,3 +11,9 @@ export interface User {
 	passkey: string;
 	created_at: string;
 }
+
+export interface Project {
+	id: number;
+	title: string;
+	workspace_id: number;
+}

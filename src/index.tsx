@@ -16,10 +16,10 @@ import Login from './pages/login';
 import Register from './pages/register';
 import { CookieStore, Session, sessionMiddleware } from 'hono-sessions';
 import { setCookie } from 'hono/cookie';
-import { Workspace as WorkspaceType } from './schema';
-import Workspace from './pages/workspace';
-import auth from './auth';
+import auth from './routes/auth';
 import Modal from './components/modal';
+import workspace from './routes/workspace';
+import project from './routes/project';
 
 export type Bindings = {
 	DB: D1Database;
@@ -72,77 +72,10 @@ app.get('/register', (c) => {
 	return c.html(<Register></Register>);
 });
 
-app.get('/w/:workspaceId', async (c) => {
-	const wsId = c.req.param('workspaceId');
-	const { results } = await c.env.DB.prepare('SELECT id, title, created_at FROM workspace WHERE id = ?')
-		.bind(parseInt(wsId))
-		.all<WorkspaceType>();
-	const userId = c.get('session').get('userId') as number;
-
-	try {
-		const projects = await c.env.DB.prepare('SELECT id, title, workspace_id FROM project WHERE workspace_id = ?').bind(results[0].id).all();
-		console.log(projects);
-	} catch (error) {}
-
-	if (!userId) return c.html(<div>Unauthorized Access!</div>);
-
-	return c.html(<Workspace authId={userId} workspace={results[0]}></Workspace>);
-});
-
-app.get('/w/:workspaceId/home', async (c) => {
-	const wsId = c.req.param('workspaceId');
-
-	return c.html(
-		<div>
-			<div role="tablist">
-				<button
-					hx-get={`/w/${wsId}/home`}
-					class="bg-secondary rounded-lg px-4 py-2"
-					aria-selected="true"
-					autofocus
-					role="tab"
-					aria-controls="tab-content"
-				>
-					Home
-				</button>
-				<button hx-get={`/w/${wsId}/tasks`} class="rounded-lg px-4 py-2" role="tab" aria-selected="false" aria-controls="tab-content">
-					Tasks
-				</button>
-			</div>
-			<div id="tab-content" role="tabpanel">
-				Home content
-			</div>
-		</div>,
-	);
-});
-
-app.get('/w/:workspaceId/tasks', async (c) => {
-	const wsId = c.req.param('workspaceId');
-
-	return c.html(
-		<div>
-			<div role="tablist">
-				<button hx-get={`/w/${wsId}/home`} class="rounded-lg px-4 py-2" aria-selected="false" role="tab" aria-controls="tab-content">
-					Home
-				</button>
-				<button
-					hx-get={`/w/${wsId}/tasks`}
-					class="bg-secondary rounded-lg px-4 py-2"
-					role="tab"
-					autofocus
-					aria-selected="true"
-					aria-controls="tab-content"
-				>
-					Tasks
-				</button>
-			</div>
-			<div id="tab-content" role="tabpanel">
-				Task content
-			</div>
-		</div>,
-	);
-});
+app.route('/w/:workspaceId', workspace);
 
 app.route('/auth', auth);
+
+app.route('/p/:projectId', project);
 
 export default app;

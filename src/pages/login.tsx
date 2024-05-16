@@ -6,7 +6,8 @@ export default function Login() {
 		<BaseLayout>
 			<form
 				hx-post="/auth/login"
-				hx-target-error="#error-result"
+				hx-target="#error-result"
+				hx-swap="innerHTML"
 				class="absolute inset-0 m-auto flex max-h-[40rem] max-w-[40rem] flex-col gap-5 rounded-lg px-20 py-10 shadow-2xl"
 			>
 				<h1 class="text-center text-3xl font-bold">Welcome Back</h1>

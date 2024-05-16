@@ -1,12 +1,7 @@
 import { html } from 'hono/html';
-import { createContext, useState } from 'hono/jsx';
+import { PropsWithChildren } from 'hono/jsx';
 
-const theme = 'light';
-export const ThemeContext = createContext(theme);
-
-export default function BaseLayout({ children, authId }: { children: JSX.Element; authId?: number }) {
-	const [theme, setTheme] = useState('light');
-
+export default function BaseLayout({ children, authId, navigation }: PropsWithChildren & { authId?: number; navigation?: JSX.Element }) {
 	return (
 		<html>
 			<head>
@@ -17,6 +12,7 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 				></script>
 				<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 				<script src="https://cdn.tailwindcss.com"></script>
+				<script src="https://kit.fontawesome.com/032f179500.js" crossorigin="anonymous"></script>
 				{html`
 					<style type="text/tailwindcss">
 						@layer base {
@@ -207,6 +203,8 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 										border: 'hsl(var(--border))',
 										input: 'hsl(var(--input))',
 										secondary: 'hsl(var(--secondary))',
+										primary: 'hsl(var(--primary))',
+										muted: 'hsl(var(--muted))',
 									},
 								},
 							},
@@ -217,19 +215,25 @@ export default function BaseLayout({ children, authId }: { children: JSX.Element
 				<title>Manja</title>
 			</head>
 			<body _="on changeTheme toggle .dark on me">
-				<nav class="bg-background flex justify-end gap-3 px-10 py-3">
-					{authId && (
-						<button class="border-border rounded border px-3 py-1 hover:bg-indigo-500 hover:text-white" hx-post="/auth/logout">
-							Logout
-						</button>
-					)}
-					<input type="checkbox" onchange="" />
-					<button class="border-border rounded border px-3 py-1 hover:bg-indigo-500 hover:text-white" _="on click trigger changeTheme">
-						Theme
-					</button>
-				</nav>
-				{children}
+				<div class="flex h-full flex-row">
+					<nav class="bg-secondary border-border w-[15%] border">{navigation}</nav>
+					<div class="grow">
+						<nav class="bg-background flex justify-end gap-3 px-10 py-3">
+							{authId && (
+								<button class="border-border rounded border bg-indigo-600 px-3 py-1 text-white" hx-post="/auth/logout">
+									Logout
+								</button>
+							)}
+							<button class="border-border rounded border px-3 py-1 hover:bg-indigo-500 hover:text-white" _="on click trigger changeTheme">
+								Theme
+							</button>
+						</nav>
+						{children}
+					</div>
+				</div>
 			</body>
 		</html>
 	);
 }
+
+BaseLayout.Navigation = <div></div>;
