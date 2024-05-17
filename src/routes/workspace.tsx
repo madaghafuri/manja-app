@@ -9,7 +9,6 @@ import Modal from '../components/modal';
 import { AuthInput } from '../components/auth-input';
 import { validator } from 'hono/validator';
 import ProjectPage from '../pages/projects';
-import ProjectBoard from '../pages/project-board';
 
 const app = new Hono<{ Bindings: Bindings; Variables: { session: Session; session_key_rotation: boolean } }>();
 
@@ -26,8 +25,6 @@ app.get('/', async (c) => {
 		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id WHERE workspace_id = ?',
 		results[0].id,
 	);
-
-	console.log(projects);
 
 	if (!userId) return c.html(<BaseLayout>Unauthorized Access</BaseLayout>);
 
@@ -151,12 +148,11 @@ app.post(
 					1,
 				),
 			]);
-			console.log(rows);
 		} catch (error: any) {
 			console.error(error.message);
 		}
 
-		return c.html(<Modal>Success</Modal>);
+		return c.html(<Modal>Success</Modal>, 200, { 'HX-Trigger': 'projectCreated' });
 	},
 );
 
@@ -183,9 +179,50 @@ app.get('/p/:projectId', async (c) => {
 		workspaceId,
 	);
 
-	if (!workspace || !project || !projects?.results) return c.html(<BaseLayout>Unauthorized Access</BaseLayout>);
+	if (!workspace || !project || !projects?.results) {
+		console.log(project, projectId);
+		return c.html(<BaseLayout>Unauthorized Access</BaseLayout>);
+	}
 
 	return c.html(<ProjectPage authId={userId} workspace={workspace} project={project} projects={projects.results}></ProjectPage>);
+});
+
+//** TRIGGERED AFTER SUCCESS CREATING PROJECT */
+app.get('/p', async (c) => {
+	const workspaceId = c.req.param('workspaceId');
+	const userId = c.get('session').get('userId');
+
+	const member = await performQueryFirst<{ id: number }>(
+		c,
+		'SELECT id from workspace_member WHERE user_id = ? AND workspace_id = ?',
+		userId,
+		workspaceId,
+	);
+
+	console.log(member);
+
+	// if (!member) return c.html(<BaseLayout>Unauthorized</BaseLayout>);
+
+	const projects = await performQueryAll<Project>(
+		c,
+		'SELECT project.id, project.title, project.workspace_id FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.member_id = ? WHERE project.workspace_id = ?',
+		member?.id,
+		workspaceId,
+	);
+
+	console.log(projects);
+
+	return c.html(
+		<>
+			{projects?.results.map((val) => {
+				return (
+					<a href={`/w/${val.workspace_id}/p/${val.id}`} class="px-2 py-1 text-sm">
+						{val.title}
+					</a>
+				);
+			})}
+		</>,
+	);
 });
 
 export default app;

@@ -20,13 +20,15 @@ export default function AuthenticatedNav({ workspace, projects }: { workspace: W
 						<i class="fa-solid fa-plus"></i>
 					</button>
 				</div>
-				{projects?.map((val) => {
-					return (
-						<a href={`/w/${workspace.id}/p/${val.id}`} key={val.id} class="px-2 py-1 text-sm">
-							{val.title}
-						</a>
-					);
-				})}
+				<div id="project-list" class="flex flex-col gap-1" hx-get={`/w/${workspace.id}/p`} hx-trigger="projectCreated from:body">
+					{projects?.map((val) => {
+						return (
+							<a href={`/w/${workspace.id}/p/${val.id}`} key={val.id} class="px-2 py-1 text-sm">
+								{val.title}
+							</a>
+						);
+					})}
+				</div>
 			</div>
 		</div>
 	);

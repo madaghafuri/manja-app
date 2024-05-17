@@ -28,9 +28,9 @@ function ModalClose({ children, ...props }: PropsWithChildren & Hono.HTMLAttribu
 	);
 }
 
-export default function Modal({ children }: PropsWithChildren) {
+export default function Modal({ children, ...props }: PropsWithChildren & Hono.HTMLAttributes) {
 	return (
-		<div id="modal" _="on closeModal add .closing then wait for animationend then remove me">
+		<div {...props} id="modal" _="on closeModal add .closing then wait for animationend then remove me">
 			<div class="modal-underlay" _="on click trigger closeModal"></div>
 			<div class="modal-content bg-background">{children}</div>
 		</div>
