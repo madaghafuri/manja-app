@@ -5,6 +5,8 @@ import { performQueryFirst } from '../helper';
 import { Project } from '../schema';
 import ProjectBoard from '../pages/project-board';
 import ProjectList from '../pages/project-list';
+import ProjectCalendar from '../pages/project-calendar';
+import ProjectDashboard from '../pages/project-dashboard';
 
 const app = new Hono<{
 	Bindings: Bindings;
@@ -22,7 +24,7 @@ app.get('/board', async (c) => {
 
 	if (!project) return c.html(<div>Request Error</div>);
 
-	return c.html(<ProjectBoard project={project}></ProjectBoard>);
+	return c.html(<ProjectBoard tab="board" project={project}></ProjectBoard>);
 });
 
 app.get('/list', async (c) => {
@@ -31,7 +33,25 @@ app.get('/list', async (c) => {
 
 	if (!project) return c.html(<div>Request Error</div>);
 
-	return c.html(<ProjectList project={project}></ProjectList>);
+	return c.html(<ProjectList tab="list" project={project}></ProjectList>);
+});
+
+app.get('/calendar', async (c) => {
+	const projectId = c.req.param('projectId');
+	const project = await performQueryFirst<Project>(c, query, projectId);
+
+	if (!project) return c.html(<div>Request Error</div>);
+
+	return c.html(<ProjectCalendar tab="calendar" project={project}></ProjectCalendar>);
+});
+
+app.get('/dashboard', async (c) => {
+	const projectId = c.req.param('projectId');
+	const project = await performQueryFirst<Project>(c, query, projectId);
+
+	if (!project) return c.html(<div>Request Error</div>);
+
+	return c.html(<ProjectDashboard tab="dashboard" project={project}></ProjectDashboard>);
 });
 
 export default app;
