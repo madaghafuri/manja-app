@@ -136,17 +136,11 @@ app.post(
 		const wsId = c.req.param('workspaceId');
 
 		const userId = c.get('session').get('userId');
-		const memberId = await c.env.DB.prepare('SELECT id, role_id FROM workspace_member WHERE user_id = ?')
-			.bind(userId)
-			.first<{ id: number; role_id: number }>();
 
 		try {
 			const rows = await c.env.DB.batch([
 				c.env.DB.prepare('INSERT INTO project (title, workspace_id) VALUES (?, ?)').bind(title, wsId),
-				c.env.DB.prepare('INSERT INTO project_member (project_id, member_id, role_id) VALUES (last_insert_rowid(), ?, ?)').bind(
-					memberId?.id,
-					1,
-				),
+				c.env.DB.prepare('INSERT INTO project_member (project_id, user_id, role_id) VALUES (last_insert_rowid(), ?, ?)').bind(userId, 1),
 			]);
 		} catch (error: any) {
 			console.error(error.message);
@@ -161,21 +155,12 @@ app.get('/p/:projectId', async (c) => {
 	const workspaceId = c.req.param('workspaceId');
 	const projectId = c.req.param('projectId');
 
-	const member = await performQueryFirst<{ id: number }>(
-		c,
-		'SELECT id FROM workspace_member WHERE user_id = ? AND workspace_id = ?',
-		userId,
-		workspaceId,
-	);
-
-	if (!member) return c.html(<BaseLayout>Unauthorized</BaseLayout>);
-
 	const project = await performQueryFirst<Project>(c, 'SElECT id, title FROM project WHERE id = ?', projectId);
 	const workspace = await performQueryFirst<WorkspaceType>(c, 'SELECT id, title, created_at FROM workspace WHERE id = ?', workspaceId);
 	const projects = await performQueryAll<Project>(
 		c,
-		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.member_id = ? WHERE project.workspace_id = ?',
-		member.id,
+		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.user_id = ? WHERE project.workspace_id = ?',
+		userId,
 		workspaceId,
 	);
 
@@ -192,21 +177,10 @@ app.get('/p', async (c) => {
 	const workspaceId = c.req.param('workspaceId');
 	const userId = c.get('session').get('userId');
 
-	const member = await performQueryFirst<{ id: number }>(
-		c,
-		'SELECT id from workspace_member WHERE user_id = ? AND workspace_id = ?',
-		userId,
-		workspaceId,
-	);
-
-	console.log(member);
-
-	// if (!member) return c.html(<BaseLayout>Unauthorized</BaseLayout>);
-
 	const projects = await performQueryAll<Project>(
 		c,
-		'SELECT project.id, project.title, project.workspace_id FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.member_id = ? WHERE project.workspace_id = ?',
-		member?.id,
+		'SELECT project.id, project.title, project.workspace_id FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.user_id = ? WHERE project.workspace_id = ?',
+		userId,
 		workspaceId,
 	);
 

@@ -5,7 +5,7 @@ export default function ProjectCalendar({ project, tab }: { project: Project; ta
 	return (
 		<main>
 			<ProjectTab project={project} tab={tab} />
-			<div id="tab-content" role="tabpanel" class="tab-content">
+			<div id="tab-content" role="tabpanel" class="px-4 py-2">
 				Calendar Content
 			</div>
 		</main>

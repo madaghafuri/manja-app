@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { Bindings } from '..';
 import { Session } from 'hono-sessions';
-import { performQueryFirst } from '../helper';
+import { performQueryAll, performQueryFirst } from '../helper';
 import { Project } from '../schema';
 import ProjectBoard from '../pages/project-board';
 import ProjectList from '../pages/project-list';
@@ -23,6 +23,14 @@ app.get('/board', async (c) => {
 	const project = await performQueryFirst<Project>(c, query, projectId);
 
 	if (!project) return c.html(<div>Request Error</div>);
+
+	const tasks = await performQueryAll(
+		c,
+		'SELECT task.id, task.title, task.description, task.start_date, task.end_date, task_status.title, tag.title, user.username FROM task INNER JOIN task_status ON task.status_id = task_status.id INNER JOIN tag ON task.tag_id = tag.id INNER JOIN project_member ON task.assignee_id = project_member.id INNER JOIN user ON project_member.user_id = user.id WHERE task.project_id = ?',
+		projectId,
+	);
+
+	console.log(tasks);
 
 	return c.html(<ProjectBoard tab="board" project={project}></ProjectBoard>);
 });

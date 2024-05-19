@@ -19,15 +19,7 @@ export default function Project({
 				<section class="border-border border-b-[1px] px-6 py-3">
 					<h1>{project.title}</h1>
 				</section>
-				<section
-					id="tabs"
-					hx-get={`/p/${project.id}/board`}
-					hx-trigger="load delay:100ms"
-					hx-target="#tabs"
-					hx-swap="innerHTML"
-					class=""
-				></section>
-				<section>content</section>
+				<section id="tabs" hx-get={`/p/${project.id}/board`} hx-trigger="load delay:100ms" hx-target="#tabs" hx-swap="innerHTML"></section>
 			</main>
 		</BaseLayout>
 	);

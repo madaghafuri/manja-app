@@ -5,9 +5,7 @@ export default function ProjectBoard({ project, tab }: { project: Project; tab: 
 	return (
 		<main>
 			<ProjectTab project={project} tab={tab} />
-			<div id="tab-content" role="tabpanel">
-				Board Content
-			</div>
+			<div id="tab-content" role="tabpanel" class="px-4 py-2"></div>
 		</main>
 	);
 }

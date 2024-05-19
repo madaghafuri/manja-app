@@ -5,7 +5,7 @@ export default function ProjectDashboard({ project, tab }: { project: Project; t
 	return (
 		<main>
 			<ProjectTab project={project} tab={tab} />
-			<div id="tab-content" role="tabpanel" class="tab-content p-2">
+			<div id="tab-content" role="tabpanel" class="px-4 py-2">
 				Dashbaord Content
 			</div>
 		</main>
