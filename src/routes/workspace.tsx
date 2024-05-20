@@ -9,6 +9,7 @@ import Modal from '../components/modal';
 import { AuthInput } from '../components/auth-input';
 import { validator } from 'hono/validator';
 import ProjectPage from '../pages/projects';
+import StatusInput from '../components/status-input';
 
 const app = new Hono<{ Bindings: Bindings; Variables: { session: Session; session_key_rotation: boolean } }>();
 
@@ -98,6 +99,8 @@ app.get('/tasks', async (c) => {
 app.get('/p/create', async (c) => {
 	const wsId = c.req.param('workspaceId');
 
+	const statuses = ['to do', 'doing', 'done'];
+
 	return c.html(
 		<Modal>
 			<Modal.Header>
@@ -111,7 +114,23 @@ app.get('/p/create', async (c) => {
 						Project's Name
 					</label>
 					<AuthInput required type="text" name="title" />
-					<div>
+					<label htmlFor="status" class="text-sm font-semibold tracking-tight">
+						Status
+					</label>
+
+					<div class="grid grid-cols-3 gap-5">
+						{statuses.map((val) => {
+							return (
+								<input
+									id="status"
+									value={val}
+									name="status[]"
+									class="border-border rounded border px-2 py-1 font-light uppercase tracking-wide shadow-lg"
+								></input>
+							);
+						})}
+					</div>
+					<div class="absolute bottom-5 right-5">
 						<button type="submit" class="rounded bg-indigo-600 px-2 py-1 text-white">
 							Create
 						</button>
@@ -134,16 +153,33 @@ app.post(
 		const value = c.req.valid('form');
 		const title = value['title'];
 		const wsId = c.req.param('workspaceId');
+		const statuses = value['status[]'] as unknown as string[];
 
 		const userId = c.get('session').get('userId');
 
 		try {
-			const rows = await c.env.DB.batch([
-				c.env.DB.prepare('INSERT INTO project (title, workspace_id) VALUES (?, ?)').bind(title, wsId),
-				c.env.DB.prepare('INSERT INTO project_member (project_id, user_id, role_id) VALUES (last_insert_rowid(), ?, ?)').bind(userId, 1),
+			c.env.DB.prepare('INSERT INTO project (title, workspace_id) VALUES (?, ?)').bind(title, wsId).run();
+		} catch (error) {
+			return c.html(<Modal>Error Creating Project!</Modal>);
+		}
+
+		const projectid = await performQueryFirst<{ 'last_insert_rowid()': number }>(c, 'SELECT last_insert_rowid()');
+
+		if (!projectid) return c.html(<Modal>Error Creating Project!</Modal>);
+
+		try {
+			await c.env.DB.batch([
+				c.env.DB.prepare('INSERT INTO project_member (project_id, user_id, role_id) VALUES (?, ?, ?)').bind(
+					projectid['last_insert_rowid()'],
+					userId,
+					1,
+				),
+				c.env.DB.prepare(
+					'INSERT INTO task_status (title, created_at, project_id) VALUES (?2, date(), ?1), (?3, date(), ?1), (?4, date(), ?1)',
+				).bind(projectid['last_insert_rowid()'], statuses[0], statuses[1], statuses[2]),
 			]);
 		} catch (error: any) {
-			console.error(error.message);
+			return c.html(<Modal>Error Creating Project!</Modal>);
 		}
 
 		return c.html(<Modal>Success</Modal>, 200, { 'HX-Trigger': 'projectCreated' });
@@ -164,8 +200,7 @@ app.get('/p/:projectId', async (c) => {
 		workspaceId,
 	);
 
-	if (!workspace || !project || !projects?.results) {
-		console.log(project, projectId);
+	if (!workspace || !project || !projects?.results || !userId) {
 		return c.html(<BaseLayout>Unauthorized Access</BaseLayout>);
 	}
 
@@ -183,8 +218,6 @@ app.get('/p', async (c) => {
 		userId,
 		workspaceId,
 	);
-
-	console.log(projects);
 
 	return c.html(
 		<>

@@ -17,3 +17,12 @@ export interface Project {
 	title: string;
 	workspace_id: number;
 }
+
+export interface Task {
+	id: number;
+	title: string;
+	description: string;
+	start_date: string;
+	end_date: string;
+	status_id: number;
+}

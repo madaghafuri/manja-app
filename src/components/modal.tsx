@@ -32,7 +32,7 @@ export default function Modal({ children, ...props }: PropsWithChildren & Hono.H
 	return (
 		<div {...props} id="modal" _="on closeModal add .closing then wait for animationend then remove me">
 			<div class="modal-underlay" _="on click trigger closeModal"></div>
-			<div class="modal-content bg-background">{children}</div>
+			<div class="modal-content bg-background relative">{children}</div>
 		</div>
 	);
 }

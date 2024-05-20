@@ -1,5 +1,5 @@
 import { html } from 'hono/html';
-import { PropsWithChildren } from 'hono/jsx';
+import { PropsWithChildren, memo } from 'hono/jsx';
 
 export default function BaseLayout({ children, authId, navigation }: PropsWithChildren & { authId?: number; navigation?: JSX.Element }) {
 	return (
@@ -85,6 +85,22 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 						}
 
 						@layer base {
+							* {
+								@apply border-border;
+								::-webkit-scrollbar {
+									width: 10px;
+									height: 10px;
+								}
+								::-webkit-scrollbar-track {
+									@apply bg-zinc-800;
+									border-radius: 10px;
+								}
+								::-webkit-scrollbar-thumb {
+									border-radius: 10px;
+									box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+									@apply bg-zinc-800;
+								}
+							}
 							body {
 								@apply bg-background text-foreground;
 							}
@@ -152,6 +168,18 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 						#modal.closing > .modal-content {
 							/* Animate when closing */
 							animation-name: zoomOut;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#task-form {
+							animation-name: fadeIn;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#task-form.closing {
+							animation-name: fadeOut;
 							animation-duration: 150ms;
 							animation-timing-function: ease;
 						}
