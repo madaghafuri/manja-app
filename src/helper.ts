@@ -43,3 +43,12 @@ export async function performQueryFirst<T>(
 		console.error(error.message);
 	}
 }
+
+export function findKeysNotNull<T extends Record<any, any>>(obj: T) {
+	for (const key in obj) {
+		if (obj[key] !== null) {
+			return key;
+		}
+	}
+	return null;
+}

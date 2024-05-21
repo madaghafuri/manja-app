@@ -7,15 +7,7 @@ export default function TaskForm({ projectId, statusId }: { projectId: number; s
 			hx-target="this"
 			hx-swap="outerHTML"
 		>
-			<input
-				type="text"
-				name="title"
-				placeholder="Task name"
-				class="px-2 py-1 focus:outline-none"
-				autofocus
-				hx-get={`/p/${projectId}/spill`}
-				hx-trigger="blur"
-			/>
+			<input type="text" name="title" placeholder="Task name" class="px-2 py-1 focus:outline-none" autofocus />
 			<button type="submit" class="text-background justify-self-end rounded bg-indigo-500 p-2 aria-disabled:opacity-50">
 				Save
 			</button>

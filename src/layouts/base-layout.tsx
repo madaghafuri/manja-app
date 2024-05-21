@@ -142,15 +142,10 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 							/* Position visible dialog near the top of the window */
 							margin-top: 10vh;
 
-							/* Sizing for visible dialog */
-							width: 80%;
-							max-width: 600px;
-
 							/* Display properties for visible dialog*/
 							border: solid 1px #999;
 							border-radius: 8px;
 							box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
-							padding: 20px;
 
 							/* Animate when opening */
 							animation-name: zoomIn;

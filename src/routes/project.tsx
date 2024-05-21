@@ -1,14 +1,16 @@
 import { Hono } from 'hono';
 import { Bindings } from '..';
 import { Session } from 'hono-sessions';
-import { performQueryAll, performQueryFirst } from '../helper';
-import { Project, Task } from '../schema';
+import { findKeysNotNull, performQueryAll, performQueryFirst } from '../helper';
+import { Project, Status, Task } from '../schema';
 import ProjectBoard, { BoardData } from '../pages/project-board';
 import ProjectList from '../pages/project-list';
 import ProjectCalendar from '../pages/project-calendar';
 import ProjectDashboard from '../pages/project-dashboard';
 import TaskForm from '../components/task-form';
 import TaskCard from '../components/task-card';
+import TaskModal from '../components/task-modal';
+import { validator } from 'hono/validator';
 
 const app = new Hono<{
 	Bindings: Bindings;
@@ -35,7 +37,7 @@ app.get('/board', async (c) => {
 		status_id: number;
 	}>(
 		c,
-		'SELECT task.id, task.title, task.description, task.start_date, task.end_date, task.status_id FROM task INNER JOIN task_status ON task.status_id = task_status.id WHERE task.project_id = ?',
+		'SELECT task.id, task.title, task.description, task.start_date, task.end_date, task.status_id, task.project_id FROM task INNER JOIN task_status ON task.status_id = task_status.id WHERE task.project_id = ?',
 		projectId,
 	);
 
@@ -117,5 +119,76 @@ app.post('/t', async (c) => {
 		</>,
 	);
 });
+
+app.get('/t/:taskId', async (c) => {
+	const taskId = c.req.param('taskId');
+	const projectId = c.req.param('projectId');
+
+	const task = await performQueryFirst<{ data: string }>(
+		c,
+		"SELECT json_object('id', task.id, 'title', task.title, 'description', task.description, 'start_date', task.start_date, 'end_date', task.end_date, 'created_at', task.created_at, 'project', json_object('id', project.id, 'title', project.title), 'status', json_object('id', task_status.id, 'title', task_status.title, 'created_at', task_status.created_at)) AS data FROM task INNER JOIN project ON task.project_id = project.id INNER JOIN task_status ON task.status_id = task_status.id WHERE task.id = ?",
+		taskId,
+	);
+
+	if (!task) return c.html(<>Request Error</>);
+
+	const statuses = await performQueryAll(c, 'SELECT id, title, created_at FROM task_status WHERE project_id = ?', projectId);
+
+	const parsedData = JSON.parse(task.data) as Task;
+	console.log(parsedData);
+
+	return c.html(<TaskModal task={parsedData} statuses={statuses?.results as Status[]} />);
+});
+
+app.patch(
+	'/t/:taskId',
+	validator('form', (value) => {
+		return value;
+	}),
+	async (c) => {
+		const taskId = c.req.param('taskId');
+		const projectId = c.req.param('projectId');
+		const value = c.req.valid('form') as Record<keyof Task, Task[keyof Task]>;
+		const column = findKeysNotNull(value);
+
+		console.log(projectId);
+
+		if (!column) return c.html(<>Error Request</>);
+
+		try {
+			await c.env.DB.prepare(`UPDATE task SET ${column} = ? WHERE id = ?`).bind(value[column], taskId).run();
+		} catch (error) {
+			console.error(error);
+			return c.html(<>Error Request</>);
+		}
+
+		const statuses = await performQueryAll<Status>(c, 'SELECT id, title, created_at FROM task_status WHERE project_id = ?', projectId);
+
+		if (!statuses?.results) {
+			return c.html(<>Error</>);
+		}
+
+		return c.html(
+			<select
+				hx-patch={`/p/${projectId}/t/${taskId}`}
+				hx-include="[name='status_id']"
+				hx-trigger="change"
+				hx-target="this"
+				hx-swap="outerHTML"
+				name="status_id"
+				id="task-status"
+				class="rounded p-1 text-xs font-bold uppercase hover:bg-zinc-200 focus:outline-none"
+			>
+				{statuses.results.map((val) => {
+					return (
+						<option value={val.id} class="font-bold uppercase" selected={val.id === parseInt(value[column] as string)}>
+							{val.title}
+						</option>
+					);
+				})}
+			</select>,
+		);
+	},
+);
 
 export default app;

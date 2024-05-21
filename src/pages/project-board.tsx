@@ -1,12 +1,12 @@
 import ProjectTab from '../components/project-tab';
 import TaskCard from '../components/task-card';
-import { Project, Task } from '../schema';
+import { Project, Status, Task } from '../schema';
 
 export type BoardData = {
 	id: number;
 	title: string;
 	created_at: string;
-	tasks: unknown[];
+	tasks: Task[];
 };
 
 export default function ProjectBoard({
@@ -22,6 +22,7 @@ export default function ProjectBoard({
 		<main>
 			<ProjectTab project={project} tab={tab} />
 			<div id="tab-content" role="tabpanel" class="flex min-h-[60rem] gap-5 px-8 py-4">
+				<section></section>
 				{data.map((val) => {
 					return (
 						<div>
