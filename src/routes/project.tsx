@@ -11,6 +11,8 @@ import TaskForm from '../components/task-form';
 import TaskCard from '../components/task-card';
 import TaskModal from '../components/task-modal';
 import { validator } from 'hono/validator';
+import { Fragment } from 'hono/jsx/jsx-runtime';
+import ContextMenu from '../components/context-menu';
 
 const app = new Hono<{
 	Bindings: Bindings;
@@ -86,7 +88,14 @@ app.get('/t', async (c) => {
 	const projectId = c.req.param('projectId') as unknown as number;
 	const { statusId } = c.req.query();
 
-	return c.html(<TaskForm projectId={projectId} statusId={parseInt(statusId)} />);
+	return c.html(
+		<Fragment>
+			<TaskForm projectId={projectId} statusId={parseInt(statusId)} />
+			<button class="rounded p-2 hover:bg-zinc-200" hx-get={`/p/${projectId}/t?statusId=${statusId}`} hx-target="this" hx-swap="outerHTML">
+				Add Task
+			</button>
+		</Fragment>,
+	);
 });
 
 app.post('/t', async (c) => {
@@ -113,9 +122,6 @@ app.post('/t', async (c) => {
 	return c.html(
 		<>
 			<TaskCard task={task} />
-			<button class="rounded p-2 hover:bg-zinc-200" hx-get={`/p/${projectId}/t?statusId=${statusId}`} hx-target="this" hx-swap="outerHTML">
-				Add Task
-			</button>
 		</>,
 	);
 });
@@ -245,10 +251,9 @@ app.get('/t/:taskId/context', async (c) => {
 	const projectId = c.req.param('projectId');
 
 	return c.html(
-		<div id="context-menu" class="absolute inset-0" _="on closeContext add .closing then wait for animationend then remove me">
-			<div class="context-underlay -z-1 fixed inset-0 m-auto cursor-auto" _="on click trigger closeContext"></div>
-			<div class="context-content bg-background absolute right-0 top-10 z-10 rounded p-3 shadow">Context Menu Content</div>
-		</div>,
+		<ContextMenu>
+			<ContextMenu.Content className="bg-background min-w-[10rem] rounded-md shadow-lg">Hello World</ContextMenu.Content>
+		</ContextMenu>,
 	);
 });
 

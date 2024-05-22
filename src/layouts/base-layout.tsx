@@ -261,14 +261,15 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 					<nav class="bg-secondary border-border w-[15%] border">{navigation}</nav>
 					<div class="grow">
 						<nav class="bg-background flex justify-end gap-3 px-10 py-3">
-							{authId && (
+							{authId ? (
 								<button class="border-border rounded border bg-indigo-600 px-3 py-1 text-white" hx-post="/auth/logout">
 									Logout
 								</button>
+							) : (
+								<button class="border-border rounded border px-3 py-1">
+									<a href="/login">Login</a>
+								</button>
 							)}
-							<button class="border-border rounded border px-3 py-1 hover:bg-indigo-500 hover:text-white" _="on click trigger changeTheme">
-								Theme
-							</button>
 						</nav>
 						{children}
 					</div>

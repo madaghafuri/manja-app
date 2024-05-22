@@ -4,7 +4,7 @@ import Modal from './modal';
 export default function TaskModal({ task, statuses }: { task: Task; statuses: Status[] }) {
 	return (
 		<Modal>
-			<Modal.Header class="border-border border-b-[1px] px-3 py-2">
+			<Modal.Header className="border-border flex justify-end gap-2 border-b-[1px] px-3 py-2">
 				<button class="rounded bg-indigo-500 px-2 py-1 text-sm text-white">Share</button>
 				<Modal.Close class="rounded px-4 py-2 hover:bg-zinc-200">
 					<i class="fa-solid fa-xmark"></i>

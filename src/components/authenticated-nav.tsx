@@ -1,6 +1,14 @@
 import { Project, Workspace } from '../schema';
 
-export default function AuthenticatedNav({ workspace, projects }: { workspace: Workspace; projects?: Project[] }) {
+export default function AuthenticatedNav({
+	workspace,
+	projects,
+	project,
+}: {
+	workspace: Workspace;
+	projects?: Project[];
+	project?: Project;
+}) {
 	return (
 		<div class="first:border-border flex flex-col">
 			<h1 class="border-border border p-3 text-xl font-medium tracking-tight">{workspace.title}</h1>
@@ -23,7 +31,12 @@ export default function AuthenticatedNav({ workspace, projects }: { workspace: W
 				<div id="project-list" class="flex flex-col gap-1" hx-get={`/w/${workspace.id}/p`} hx-trigger="projectCreated from:body">
 					{projects?.map((val) => {
 						return (
-							<a href={`/w/${workspace.id}/p/${val.id}`} key={val.id} class="px-2 py-1 text-sm">
+							<a
+								href={`/w/${workspace.id}/p/${val.id}`}
+								aria-selected={val.id === project?.id}
+								key={val.id}
+								class="rounded px-2 py-1 text-sm aria-[selected=true]:bg-zinc-200"
+							>
 								{val.title}
 							</a>
 						);

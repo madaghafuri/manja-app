@@ -14,7 +14,10 @@ export default function Project({
 	project: ProjectType;
 }) {
 	return (
-		<BaseLayout authId={authId} navigation={<AuthenticatedNav workspace={workspace} projects={projects}></AuthenticatedNav>}>
+		<BaseLayout
+			authId={authId}
+			navigation={<AuthenticatedNav workspace={workspace} projects={projects} project={project}></AuthenticatedNav>}
+		>
 			<main class="bg-background border-border min-w-[90rem] border shadow-lg">
 				<section class="border-border border-b-[1px] px-6 py-3">
 					<h1>{project.title}</h1>

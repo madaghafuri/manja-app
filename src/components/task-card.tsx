@@ -7,7 +7,7 @@ export default function TaskCard({ task }: { task: Task } & HtmxAttributes) {
 			hx-get={`/p/${task.project_id}/t/${task.id}`}
 			hx-target="body"
 			hx-swap="beforeend"
-			hx-trigger="click target:#task-card"
+			hx-trigger={`click target:#task-card-${task.id}`}
 			class="border-border relative flex items-center justify-between rounded-lg border p-2 text-sm shadow hover:cursor-pointer"
 			oncontextmenu="return false"
 		>

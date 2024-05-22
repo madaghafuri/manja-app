@@ -6,8 +6,9 @@ export default function TaskForm({ projectId, statusId }: { projectId: number; s
 			class="border-border flex flex-col gap-3 rounded border p-3"
 			hx-target="this"
 			hx-swap="outerHTML"
+			_="on removeMe remove me"
 		>
-			<input type="text" name="title" placeholder="Task name" class="px-2 py-1 focus:outline-none" autofocus />
+			<input type="text" name="title" placeholder="Task name" class="px-2 py-1 focus:outline-none" autofocus _="on blur trigger removeMe" />
 			<button type="submit" class="text-background justify-self-end rounded bg-indigo-500 p-2 aria-disabled:opacity-50">
 				Save
 			</button>
