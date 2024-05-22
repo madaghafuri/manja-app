@@ -179,6 +179,25 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 							animation-timing-function: ease;
 						}
 
+						#context-menu {
+							animation-name: fadeIn;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#context-menu > .context-content {
+							animation-name: zoomIn;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
+						#context-menu.closing {
+							/* Animate when closing */
+							animation-name: fadeOut;
+							animation-duration: 150ms;
+							animation-timing-function: ease;
+						}
+
 						@keyframes fadeIn {
 							0% {
 								opacity: 0;

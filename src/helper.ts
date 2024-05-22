@@ -1,6 +1,8 @@
 import { Context } from 'hono';
 import { Bindings } from '.';
 import { Session } from 'hono-sessions';
+import { ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export async function performQueryAll<T>(
 	c: Context<{
@@ -51,4 +53,8 @@ export function findKeysNotNull<T extends Record<any, any>>(obj: T) {
 		}
 	}
 	return null;
+}
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs));
 }

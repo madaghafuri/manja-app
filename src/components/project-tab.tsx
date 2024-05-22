@@ -9,6 +9,7 @@ export default function ProjectTab({ project, tab }: { project: Project; tab: 'b
 				role="tab"
 				aria-selected={(tab === 'board').toString()}
 				aria-controls="tab-content"
+				hx-trigger="click, taskPatched from:body"
 			>
 				<i class="fa-solid fa-table-columns mr-1"></i>
 				Board

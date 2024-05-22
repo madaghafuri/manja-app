@@ -1,28 +1,34 @@
 import { PropsWithChildren, createContext } from 'hono/jsx';
+import { twMerge } from 'tailwind-merge';
+import { cn } from '../helper';
 
-function ModalHeader({ children, ...props }: PropsWithChildren & Hono.HTMLAttributes) {
+function ModalHeader({ children, className, ...props }: PropsWithChildren<Hono.HTMLAttributes> & { className?: string }) {
 	return (
-		<div class="text-xl font-bold" {...props}>
+		<div class={cn(className, 'text-xl font-bold')} {...props}>
 			{children}
 		</div>
 	);
 }
 
-function ModalContent({ children, ...props }: PropsWithChildren & Hono.HTMLAttributes) {
-	return <div {...props}>{children}</div>;
-}
-
-function ModalDescription({ children, ...props }: PropsWithChildren & Hono.HTMLAttributes) {
+function ModalContent({ children, className, ...props }: PropsWithChildren<Hono.HTMLAttributes> & { className?: string }) {
 	return (
-		<div class="text-base text-slate-400" {...props}>
+		<div class={cn(className)} {...props}>
 			{children}
 		</div>
 	);
 }
 
-function ModalClose({ children, ...props }: PropsWithChildren & Hono.HTMLAttributes) {
+function ModalDescription({ children, className, ...props }: PropsWithChildren<Hono.HTMLAttributes> & { className?: string }) {
 	return (
-		<button type="button" _="on click trigger closeModal" class="border-border rounded border px-2 py-1" {...props}>
+		<div class={cn(className, 'text-base text-slate-400')} {...props}>
+			{children}
+		</div>
+	);
+}
+
+function ModalClose({ children, className, ...props }: PropsWithChildren<Hono.HTMLAttributes> & { className?: string }) {
+	return (
+		<button type="button" _="on click trigger closeModal" class={cn(className, 'border-border rounded border px-2 py-1')} {...props}>
 			{children || 'Close'}
 		</button>
 	);

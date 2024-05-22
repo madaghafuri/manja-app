@@ -103,12 +103,14 @@ app.get('/p/create', async (c) => {
 
 	return c.html(
 		<Modal>
-			<Modal.Header>
+			<Modal.Header className="px-3 py-2">
 				<h1>Create Project</h1>
 			</Modal.Header>
-			<Modal.Description>A projects represents a team, or groups, each with its own List, workflows, and settings</Modal.Description>
+			<Modal.Description className="px-3 py-2">
+				A projects represents a team, or groups, each with its own List, workflows, and settings
+			</Modal.Description>
 			<br />
-			<Modal.Content>
+			<Modal.Content className="px-3 py-2">
 				<form class="flex flex-col gap-2" hx-post={`/w/${wsId}/p`}>
 					<label htmlFor="" class="text-sm font-semibold tracking-tight">
 						Project's Name
@@ -139,7 +141,7 @@ app.get('/p/create', async (c) => {
 			</Modal.Content>
 			<br />
 			<br />
-			<Modal.Close />
+			<Modal.Close className="absolute bottom-5 left-5" />
 		</Modal>,
 	);
 });

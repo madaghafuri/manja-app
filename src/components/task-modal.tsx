@@ -12,17 +12,28 @@ export default function TaskModal({ task, statuses }: { task: Task; statuses: St
 			</Modal.Header>
 			<Modal.Content class="flex min-h-[70vh] min-w-[80vw] px-3 py-2">
 				<section class="border-border w-[70%] border-r-[1px] px-14 py-7">
-					<h1 class="text-3xl font-bold">{task.title}</h1>
+					<input
+						type="text"
+						class="px-2 py-1 text-3xl font-bold focus:outline-none"
+						value={task.title}
+						hx-patch={`/p/${task.project.id}/t/${task.id}`}
+						hx-trigger="keyup changed delay:500ms"
+						hx-target="this"
+						hx-swap="outerHTML"
+						hx-include="[name='title']"
+						name="title"
+					/>
+					{/* <h1 class="text-3xl font-bold">{task.title}</h1> */}
 					<div class="grid grid-cols-2 gap-3 p-2">
 						<div class="grid grid-cols-[40%,60%] items-center gap-2">
 							<label htmlFor="task-status">Status</label>
 							<select
 								hx-patch={`/p/${task.project.id}/t/${task.id}`}
-								hx-include="[name='status_id']"
+								hx-include="[name='status']"
 								hx-trigger="change"
 								hx-target="this"
 								hx-swap="outerHTML"
-								name="status_id"
+								name="status"
 								id="task-status"
 								class="rounded p-1 text-xs font-bold uppercase hover:bg-zinc-200 focus:outline-none"
 							>
@@ -51,10 +62,17 @@ export default function TaskModal({ task, statuses }: { task: Task; statuses: St
 							Description
 						</label>
 						<textarea
-							value={task.description}
+							name="description"
 							class="border-border min-h-[200px] rounded border p-4 focus:outline-none"
 							placeholder="Write something"
-						/>
+							hx-patch={`/p/${task.project.id}/t/${task.id}`}
+							hx-include="[name='description']"
+							hx-trigger="keyup changed delay:1000ms"
+							hx-target="this"
+							hx-swap="outerHTML"
+						>
+							{task.description}
+						</textarea>
 					</div>
 				</section>
 				<section class="w-[30%] px-5 py-2">
