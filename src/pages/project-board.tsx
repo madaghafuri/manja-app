@@ -29,7 +29,8 @@ export default function ProjectBoard({
 							<section>
 								<h1 class="border-border min-w-[15rem] rounded-lg border p-2 text-sm font-semibold uppercase tracking-wide">{val.title}</h1>
 							</section>
-							<section class="mt-5 flex flex-col gap-2">
+							<section class="sortable mt-5 flex flex-col gap-2" hx-post="/testing" hx-trigger="end">
+								<div class="htmx-indicator">Updating...</div>
 								{val.tasks.map((task) => {
 									return <TaskCard hx-get={`/t/${task.id}/context`} hx-trigger="pointerdown[button=2]" task={task as Task} />;
 								})}

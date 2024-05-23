@@ -72,6 +72,8 @@ app.get('/register', (c) => {
 	return c.html(<Register></Register>);
 });
 
+app.get('/testing', async (c) => {});
+
 app.route('/w/:workspaceId', workspace);
 
 app.route('/auth', auth);

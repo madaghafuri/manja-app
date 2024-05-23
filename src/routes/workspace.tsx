@@ -9,7 +9,6 @@ import Modal from '../components/modal';
 import { AuthInput } from '../components/auth-input';
 import { validator } from 'hono/validator';
 import ProjectPage from '../pages/projects';
-import StatusInput from '../components/status-input';
 
 const app = new Hono<{ Bindings: Bindings; Variables: { session: Session; session_key_rotation: boolean } }>();
 
@@ -23,8 +22,8 @@ app.get('/', async (c) => {
 
 	const projects = await performQueryAll<Project>(
 		c,
-		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id WHERE workspace_id = ?',
-		results[0].id,
+		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id JOIN user ON project_member.user_id = user.id WHERE user.id = ?',
+		userId,
 	);
 
 	if (!userId) return c.html(<BaseLayout>Unauthorized Access</BaseLayout>);
@@ -197,9 +196,8 @@ app.get('/p/:projectId', async (c) => {
 	const workspace = await performQueryFirst<WorkspaceType>(c, 'SELECT id, title, created_at FROM workspace WHERE id = ?', workspaceId);
 	const projects = await performQueryAll<Project>(
 		c,
-		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.user_id = ? WHERE project.workspace_id = ?',
+		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id JOIN user ON project_member.user_id = user.id WHERE user.id = ?',
 		userId,
-		workspaceId,
 	);
 
 	if (!workspace || !project || !projects?.results || !userId) {
@@ -216,9 +214,8 @@ app.get('/p', async (c) => {
 
 	const projects = await performQueryAll<Project>(
 		c,
-		'SELECT project.id, project.title, project.workspace_id FROM project INNER JOIN project_member ON project.id = project_member.project_id AND project_member.user_id = ? WHERE project.workspace_id = ?',
+		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id JOIN user ON project_member.user_id = user.id WHERE user.id = ?',
 		userId,
-		workspaceId,
 	);
 
 	return c.html(

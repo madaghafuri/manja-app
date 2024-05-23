@@ -13,8 +13,12 @@ export default function AuthenticatedNav({
 		<div class="first:border-border flex flex-col">
 			<h1 class="border-border border p-3 text-xl font-medium tracking-tight">{workspace.title}</h1>
 			<div class="border-border border-b-2 p-2">
-				<h1 class="rounded px-2 py-1 hover:bg-indigo-100">Home</h1>
-				<h1 class="rounded px-2 py-1 hover:bg-indigo-100">Tasks</h1>
+				<a href={`/w/${workspace.id}`} class="rounded px-2 py-1 hover:bg-indigo-100">
+					Home
+				</a>
+				<a href={`/w/${workspace.id}/tasks`} class="rounded px-2 py-1 hover:bg-indigo-100">
+					Tasks
+				</a>
 			</div>
 			<div class="p-2">
 				<div class="flex items-center justify-between px-2 py-1">

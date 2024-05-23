@@ -13,6 +13,7 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 				<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 				<script src="https://cdn.tailwindcss.com"></script>
 				<script src="https://kit.fontawesome.com/032f179500.js" crossorigin="anonymous"></script>
+				<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 				{html`
 					<style type="text/tailwindcss">
 						@layer base {
@@ -251,6 +252,31 @@ export default function BaseLayout({ children, authId, navigation }: PropsWithCh
 								},
 							},
 						};
+					</script>
+					<script>
+						htmx.onLoad(function (content) {
+							const sortables = content.querySelectorAll('.sortable');
+							for (let i = 0; i < sortables.length; i++) {
+								const sortable = sortables[i];
+								const sortableInstance = new Sortable(sortable, {
+									animation: 150,
+									ghostClass: 'blue-background-class',
+
+									// Make the '.htmx-indicator' unsortable
+									filter: '.htmx-indicator',
+									onMove: function (event) {
+										return event.related.className.indexOf('htmx-indicator') === -1;
+									},
+									onEnd: function (event) {
+										this.option('disabled', true);
+									},
+								});
+
+								sortable.addEventListener('htmx:afterSwap', function () {
+									sortableInstance.option('disabled', false);
+								});
+							}
+						});
 					</script>
 				`}
 

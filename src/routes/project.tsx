@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { Bindings } from '..';
 import { Session } from 'hono-sessions';
 import { findKeysNotNull, performQueryAll, performQueryFirst } from '../helper';
-import { Project, Status, Task } from '../schema';
+import { Project, Status, Task, User } from '../schema';
 import ProjectBoard, { BoardData } from '../pages/project-board';
 import ProjectList from '../pages/project-list';
 import ProjectCalendar from '../pages/project-calendar';
@@ -140,10 +140,15 @@ app.get('/t/:taskId', async (c) => {
 
 	const statuses = await performQueryAll(c, 'SELECT id, title, created_at FROM task_status WHERE project_id = ?', projectId);
 
-	const parsedData = JSON.parse(task.data) as Task;
-	console.log(parsedData);
+	const members = await performQueryAll<User>(
+		c,
+		'SELECT user.id, user.email, user.username, user.created_at from user JOIN project_member ON user.id = project_member.user_id WHERE project_member.project_id = ?',
+		projectId,
+	);
 
-	return c.html(<TaskModal task={parsedData} statuses={statuses?.results as Status[]} />);
+	const parsedData = JSON.parse(task.data) as Task;
+
+	return c.html(<TaskModal task={parsedData} statuses={statuses?.results as Status[]} members={members?.results as User[]} />);
 });
 
 app.patch(

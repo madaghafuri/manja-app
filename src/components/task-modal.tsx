@@ -1,7 +1,7 @@
-import { Status, Task } from '../schema';
+import { Status, Task, User } from '../schema';
 import Modal from './modal';
 
-export default function TaskModal({ task, statuses }: { task: Task; statuses: Status[] }) {
+export default function TaskModal({ task, statuses, members }: { task: Task; statuses: Status[]; members: User[] }) {
 	return (
 		<Modal>
 			<Modal.Header className="border-border flex justify-end gap-2 border-b-[1px] px-3 py-2">
@@ -51,7 +51,11 @@ export default function TaskModal({ task, statuses }: { task: Task; statuses: St
 						</div>
 						<div class="grid grid-cols-[40%,60%] gap-2">
 							<label htmlFor="">Assignees</label>
-							<input type="text" value={task.status.title} class="rounded p-1 hover:bg-zinc-200" />
+							<select class="rounded p-1 hover:bg-zinc-200">
+								{members.map((user) => {
+									return <option value={user.id}>{user.username}</option>;
+								})}
+							</select>
 							<label>Priority</label>
 							<input type="text" placeholder="High" class="rounded p-1 hover:bg-zinc-200" />
 							<label htmlFor="">Tags</label>
