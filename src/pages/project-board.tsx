@@ -32,7 +32,7 @@ export default function ProjectBoard({
 							<section class="sortable mt-5 flex flex-col gap-2" hx-post="/testing" hx-trigger="end">
 								<div class="htmx-indicator">Updating...</div>
 								{val.tasks.map((task) => {
-									return <TaskCard hx-get={`/t/${task.id}/context`} hx-trigger="pointerdown[button=2]" task={task as Task} />;
+									return <TaskCard task={task as Task} />;
 								})}
 								<button
 									class="rounded p-2 hover:bg-zinc-200"

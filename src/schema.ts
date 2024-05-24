@@ -32,6 +32,8 @@ export interface Task {
 	end_date: string;
 	status_id: number;
 	project_id: number;
+	assignee_id: number;
 	status: Status;
 	project: Project;
+	assignee: User;
 }

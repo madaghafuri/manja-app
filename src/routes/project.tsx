@@ -132,9 +132,11 @@ app.get('/t/:taskId', async (c) => {
 
 	const task = await performQueryFirst<{ data: string }>(
 		c,
-		"SELECT json_object('id', task.id, 'title', task.title, 'description', task.description, 'start_date', task.start_date, 'end_date', task.end_date, 'created_at', task.created_at, 'project', json_object('id', project.id, 'title', project.title), 'status', json_object('id', task_status.id, 'title', task_status.title, 'created_at', task_status.created_at)) AS data FROM task INNER JOIN project ON task.project_id = project.id INNER JOIN task_status ON task.status_id = task_status.id WHERE task.id = ?",
+		"SELECT json_object('id', task.id, 'title', task.title, 'description', task.description, 'start_date', task.start_date, 'end_date', task.end_date, 'created_at', task.created_at, 'project', json_object('id', project.id, 'title', project.title), 'status', json_object('id', task_status.id, 'title', task_status.title, 'created_at', task_status.created_at), 'assignee', json_object('id', user.id, 'email', user.email, 'username', user.username, 'created_at', user.created_at)) AS data FROM task INNER JOIN project ON task.project_id = project.id INNER JOIN task_status ON task.status_id = task_status.id LEFT JOIN user ON task.assignee_id = user.id WHERE task.id = ?",
 		taskId,
 	);
+
+	console.log(task);
 
 	if (!task) return c.html(<>Request Error</>);
 
@@ -246,9 +248,57 @@ app.patch(
 				200,
 				{ 'HX-Trigger': 'taskPatched' },
 			);
+		} else if (column === 'assignee_id') {
+			//** UPDATING ASSIGNEE FROM TASK MODAL */
+			try {
+				await c.env.DB.prepare('UPDATE task SET assignee_id = ? WHERE id = ?').bind(value[column], taskId).run();
+			} catch (error) {
+				console.error(error);
+			}
+
+			const members = await performQueryAll<User>(
+				c,
+				'SELECT user.id, user.email, user.username, user.created_at from user JOIN project_member ON user.id = project_member.user_id WHERE project_member.project_id = ?',
+				projectId,
+			);
+
+			return c.html(
+				<select
+					class="rounded p-1 hover:bg-zinc-200"
+					hx-patch={`/p/${projectId}/t/${taskId}`}
+					hx-include="[name='assignee_id]"
+					hx-trigger="change"
+					hx-target-="this"
+					hx-swap="outerHTML"
+					name="assignee_id"
+					id="task_assignee"
+				>
+					{members?.results.map((user) => {
+						return (
+							<option selected={user.id === parseInt(value[column] as string)} value={user.id}>
+								{user.username}
+							</option>
+						);
+					})}
+				</select>,
+				200,
+				{ 'HX-Trigger': 'taskPatched' },
+			);
 		}
 	},
 );
+
+app.delete('/t/:taskId', async (c) => {
+	const taskId = c.req.param('taskId');
+
+	try {
+		await c.env.DB.prepare('DELETE FROM task WHERE id = ?').bind(taskId).run();
+	} catch (error) {
+		console.error(error);
+	}
+
+	return c.html(<></>, 200, { 'HX-Trigger': 'taskPatched' });
+});
 
 //** OPEN CONTEXT MENU RESPONSE */
 app.get('/t/:taskId/context', async (c) => {
@@ -257,7 +307,19 @@ app.get('/t/:taskId/context', async (c) => {
 
 	return c.html(
 		<ContextMenu>
-			<ContextMenu.Content className="bg-background min-w-[10rem] rounded-md shadow-lg">Hello World</ContextMenu.Content>
+			<ContextMenu.Content className="bg-background min-w-[10rem] rounded-md shadow-lg">
+				<div class="flex flex-col">
+					<button
+						hx-delete={`/p/${projectId}/t/${taskId}`}
+						hx-trigger="click"
+						type="button"
+						class="flex items-center gap-3 rounded-md px-2 py-1 text-red-700 hover:bg-zinc-200"
+					>
+						<i class="fa-regular fa-trash-can"></i>
+						Delete
+					</button>
+				</div>
+			</ContextMenu.Content>
 		</ContextMenu>,
 	);
 });

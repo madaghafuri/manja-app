@@ -23,7 +23,6 @@ export default function TaskModal({ task, statuses, members }: { task: Task; sta
 						hx-include="[name='title']"
 						name="title"
 					/>
-					{/* <h1 class="text-3xl font-bold">{task.title}</h1> */}
 					<div class="grid grid-cols-2 gap-3 p-2">
 						<div class="grid grid-cols-[40%,60%] items-center gap-2">
 							<label htmlFor="task-status">Status</label>
@@ -51,9 +50,22 @@ export default function TaskModal({ task, statuses, members }: { task: Task; sta
 						</div>
 						<div class="grid grid-cols-[40%,60%] gap-2">
 							<label htmlFor="">Assignees</label>
-							<select class="rounded p-1 hover:bg-zinc-200">
+							<select
+								class="rounded p-1 hover:bg-zinc-200"
+								hx-patch={`/p/${task.project.id}/t/${task.id}`}
+								hx-include="[name='assignee_id']"
+								hx-trigger="change"
+								hx-target-="this"
+								hx-swap="outerHTML"
+								name="assignee_id"
+								id="task_assignee"
+							>
 								{members.map((user) => {
-									return <option value={user.id}>{user.username}</option>;
+									return (
+										<option selected={task.assignee.id === user.id} value={user.id}>
+											{user.username}
+										</option>
+									);
 								})}
 							</select>
 							<label>Priority</label>
