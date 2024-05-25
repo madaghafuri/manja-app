@@ -136,8 +136,6 @@ app.get('/t/:taskId', async (c) => {
 		taskId,
 	);
 
-	console.log(task);
-
 	if (!task) return c.html(<>Request Error</>);
 
 	const statuses = await performQueryAll(c, 'SELECT id, title, created_at FROM task_status WHERE project_id = ?', projectId);

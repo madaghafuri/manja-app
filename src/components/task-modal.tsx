@@ -60,6 +60,7 @@ export default function TaskModal({ task, statuses, members }: { task: Task; sta
 								name="assignee_id"
 								id="task_assignee"
 							>
+								{!task.assignee.id ? <option value="null">Empty</option> : null}
 								{members.map((user) => {
 									return (
 										<option selected={task.assignee.id === user.id} value={user.id}>

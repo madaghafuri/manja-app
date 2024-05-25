@@ -105,26 +105,11 @@ app.post(
 
 		if (!result) return c.html(<span class="font-bold text-red-500">Credential does not match our record</span>);
 
-		let workspaceId: number;
-		// try {
-		// 	const res = await c.env.DB.prepare(
-		// 		'SELECT workspace.id, workspace.title, workspace.created_at FROM workspace INNER JOIN workspace_member ON workspace_member.user_id = ?',
-		// 	)
-		// 		.bind(result.id)
-		// 		.first<WorkspaceType>();
-		// 	workspaceId = (res as WorkspaceType).id as number;
-		// 	console.log(res);
-		// } catch (error) {
-		// 	return c.html(<div>Error 404 Not found</div>);
-		// }
-
 		const workspace = await performQueryFirst<WorkspaceType>(
 			c,
 			'SELECT workspace.id, workspace.title, workspace.created_at FROM workspace JOIN workspace_member ON workspace.id = workspace_member.workspace_id JOIN user ON workspace_member.user_id = user.id WHERE user.id = ?',
 			result.id,
 		);
-
-		console.log(workspace);
 
 		const session = c.get('session');
 		session.set('userId', result.id);

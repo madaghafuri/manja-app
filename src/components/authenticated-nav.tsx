@@ -16,9 +16,6 @@ export default function AuthenticatedNav({
 				<a href={`/w/${workspace.id}`} class="rounded px-2 py-1 hover:bg-indigo-100">
 					Home
 				</a>
-				<a href={`/w/${workspace.id}/tasks`} class="rounded px-2 py-1 hover:bg-indigo-100">
-					Tasks
-				</a>
 			</div>
 			<div class="p-2">
 				<div class="flex items-center justify-between px-2 py-1">

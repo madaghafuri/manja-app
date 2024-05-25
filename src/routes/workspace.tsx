@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { Bindings } from '..';
 import { Session } from 'hono-sessions';
-import { Project, Workspace as WorkspaceType } from '../schema';
+import { Project, Task, Workspace as WorkspaceType } from '../schema';
 import { performQueryAll, performQueryFirst } from '../helper';
 import BaseLayout from '../layouts/base-layout';
 import Workspace from '../pages/workspace';
@@ -26,9 +26,21 @@ app.get('/', async (c) => {
 		userId,
 	);
 
+	const tasks = await performQueryAll<{ data: string }>(
+		c,
+		"SELECT json_object('id', task.id, 'title', task.title, 'created_at', task.created_at, 'project', json_object('id', project.id, 'title', project.title)) AS data FROM task LEFT JOIN project on task.project_id = project.id WHERE assignee_id = ?",
+		userId,
+	);
+
+	const parsedData = tasks?.results.map((val) => {
+		return JSON.parse(val.data);
+	}) as Task[];
+
 	if (!userId) return c.html(<BaseLayout>Unauthorized Access</BaseLayout>);
 
-	return c.html(<Workspace authId={userId} workspace={results[0]} projects={projects?.results as Project[]}></Workspace>);
+	return c.html(
+		<Workspace authId={userId} workspace={results[0]} projects={projects?.results as Project[]} tasks={parsedData}></Workspace>,
+	);
 });
 
 app.get('/home', async (c) => {
