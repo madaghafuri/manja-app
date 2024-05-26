@@ -10,8 +10,8 @@ export default function TaskModal({ task, statuses, members }: { task: Task; sta
 					<i class="fa-solid fa-xmark"></i>
 				</Modal.Close>
 			</Modal.Header>
-			<Modal.Content class="flex min-h-[70vh] min-w-[80vw] px-3 py-2">
-				<section class="border-border w-[70%] border-r-[1px] px-14 py-7">
+			<Modal.Content class="flex min-h-[80vh] min-w-[80vw] px-3 py-2">
+				<section class="border-border w-[70%] border-r-[1px] px-32 py-7">
 					<input
 						type="text"
 						class="px-2 py-1 text-3xl font-bold focus:outline-none"
@@ -60,7 +60,9 @@ export default function TaskModal({ task, statuses, members }: { task: Task; sta
 								name="assignee_id"
 								id="task_assignee"
 							>
-								{!task.assignee.id ? <option value="null">Empty</option> : null}
+								<option value="null" selected={!task.assignee.id}>
+									Empty
+								</option>
 								{members.map((user) => {
 									return (
 										<option selected={task.assignee.id === user.id} value={user.id}>

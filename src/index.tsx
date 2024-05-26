@@ -20,6 +20,7 @@ import auth from './routes/auth';
 import Modal from './components/modal';
 import workspace from './routes/workspace';
 import project from './routes/project';
+import task from './routes/task';
 
 export type Bindings = {
 	DB: D1Database;
