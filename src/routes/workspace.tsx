@@ -226,8 +226,9 @@ app.get('/p', async (c) => {
 
 	const projects = await performQueryAll<Project>(
 		c,
-		'SELECT project.id, project.title FROM project INNER JOIN project_member ON project.id = project_member.project_id JOIN user ON project_member.user_id = user.id WHERE user.id = ?',
+		'SELECT project.id, project.title, project.workspace_id FROM project INNER JOIN project_member ON project.id = project_member.project_id JOIN user ON project_member.user_id = user.id WHERE user.id = ? AND project.workspace_id = ?',
 		userId,
+		workspaceId,
 	);
 
 	return c.html(
