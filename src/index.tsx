@@ -21,6 +21,7 @@ import Modal from './components/modal';
 import workspace from './routes/workspace';
 import project from './routes/project';
 import task from './routes/task';
+import { logger } from 'hono/logger';
 
 export type Bindings = {
 	DB: D1Database;

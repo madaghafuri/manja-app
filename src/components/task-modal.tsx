@@ -94,8 +94,16 @@ export default function TaskModal({ task, statuses, members }: { task: Task; sta
 						</textarea>
 					</div>
 				</section>
-				<section class="w-[30%] px-5 py-2">
+				<section class="w-[30%] px-5 py-2 relative">
 					<h1 class="text-xl">Activity</h1>
+					<div class=" absolute bottom-0 right-0 left-0 p-2">
+						<div class="rounded border-border border p-2 flex flex-col gap-2">
+							<textarea class="p-2 focus:outline-none" placeholder='Comment' name="" id=""></textarea>
+							<div class="flex items-center justify-end gap-2">
+								<button class="rounded px-2 py-1 bg-indigo-500 text-white">Send</button>
+							</div>
+						</div>
+					</div>
 				</section>
 			</Modal.Content>
 		</Modal>
