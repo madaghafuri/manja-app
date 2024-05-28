@@ -8,10 +8,13 @@ export default function TaskForm({ projectId, statusId }: { projectId: number; s
 			hx-swap="outerHTML"
 			_="on removeMe remove #task-form"
 		>
-			<input type="text" name="title" placeholder="Task name" class="px-2 py-1 focus:outline-none" autofocus _="on blur trigger removeMe" />
-			<button type="submit" class="text-background justify-self-end rounded bg-indigo-500 p-2 aria-disabled:opacity-50">
-				Save
-			</button>
+			<input type="text" name="title" placeholder="Task name" class="px-2 py-1 focus:outline-none" autofocus />
+			<div class="flex gap-2">
+				<button type="submit" class="grow text-background justify-self-end rounded bg-indigo-500 p-2 aria-disabled:opacity-50">
+					Save
+				</button>
+				<button type="button" class="border border-border rounded w-[20%]" _="on click trigger removeMe"><i class="fa-solid fa-xmark"></i></button>
+			</div>
 		</form>
 	);
 }
