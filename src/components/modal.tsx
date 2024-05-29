@@ -1,5 +1,4 @@
-import { PropsWithChildren, createContext } from 'hono/jsx';
-import { twMerge } from 'tailwind-merge';
+import { PropsWithChildren } from 'hono/jsx';
 import { cn } from '../helper';
 
 function ModalHeader({ children, className, ...props }: PropsWithChildren<Hono.HTMLAttributes> & { className?: string }) {

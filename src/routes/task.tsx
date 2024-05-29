@@ -221,6 +221,48 @@ task.patch(
 				200,
 				{ 'HX-Trigger': 'taskPatched' },
 			);
+		} else if (column === 'start_date') {
+			try {
+				await c.env.DB.prepare('UPDATE task SET start_date = ? WHERE id = ?').bind(value[column], taskId).run();
+			} catch (error) {
+				console.error(error);
+			}
+
+			return c.html(
+				<input
+					type="date"
+					name="start_date"
+					id="start_date"
+					class="rounded p-1 hover:bg-zinc-200"
+					value={(value[column] as string) || ''}
+					hx-patch={`/p/${projectId}/t/${taskId}`}
+					hx-include="[name='start_date']"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="outerHTML"
+				/>,
+			);
+		} else if (column === 'end_date') {
+			try {
+				await c.env.DB.prepare('UPDATE task SET end_date = ? WHERE id = ?').bind(value[column], taskId).run();
+			} catch (error) {
+				console.error(error);
+			}
+
+			return c.html(
+				<input
+					type="date"
+					name="end_date"
+					id="end_date"
+					class="rounded p-1 hover:bg-zinc-200"
+					value={(value[column] as string) || ''}
+					hx-patch={`/p/${projectId}/t/${taskId}`}
+					hx-include="[name='end_date']"
+					hx-trigger="change"
+					hx-target="this"
+					hx-swap="outerHTML"
+				/>,
+			);
 		}
 	},
 );

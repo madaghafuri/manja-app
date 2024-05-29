@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { Bindings } from '..';
 import { Session } from 'hono-sessions';
 import { performQueryAll, performQueryFirst } from '../helper';
-import { Project } from '../schema';
+import { Project, Task } from '../schema';
 import ProjectBoard, { BoardData } from '../pages/project-board';
 import ProjectList from '../pages/project-list';
 import ProjectCalendar from '../pages/project-calendar';
@@ -66,9 +66,19 @@ app.get('/calendar', async (c) => {
 	const projectId = c.req.param('projectId');
 	const project = await performQueryFirst<Project>(c, query, projectId);
 
+	const tasks = await performQueryAll<Task>(
+		c,
+		'SELECT task.id, task.title, task.description, task.start_date, task.end_date, task.status_id, task.project_id FROM task WHERE task.project_id = ?',
+		projectId,
+	);
+
 	if (!project) return c.html(<div>Request Error</div>);
 
-	return c.html(<ProjectCalendar tab="calendar" project={project}></ProjectCalendar>);
+	const parsedTasks = tasks?.results.map((value) => {
+		return { id: value.id.toString(), title: value.title, start: value.start_date, end: value.end_date };
+	});
+
+	return c.html(<ProjectCalendar tab="calendar" project={project} tasks={JSON.stringify(parsedTasks) || '[]'}></ProjectCalendar>);
 });
 
 app.get('/dashboard', async (c) => {
